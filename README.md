@@ -208,6 +208,11 @@ plumbing; Stagehand turns each `act/observe/extract` into grounded browser
 steps; Browserbase runs the actual Chromium in the cloud and gives you the live
 view.
 
+## Productionize
+
+Run a flow on a schedule via GitHub Actions (shipped in `.github/workflows/`),
+Browserbase Functions, or any cron host — see [docs/PRODUCTIONIZE.md](docs/PRODUCTIONIZE.md).
+
 ## Contributing
 
 Issues and PRs welcome — especially more `examples/` and additions to

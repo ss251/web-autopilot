@@ -1,0 +1,36 @@
+name: Scheduled QA
+
+# Manual by default so it never surprises you with Browserbase/model usage.
+# Uncomment the `schedule` block to run it nightly once your secrets are set:
+#   Settings → Secrets and variables → Actions →
+#     BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID, MODEL_API_KEY
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL to QA (defaults to the example target)"
+        required: false
+  # schedule:
+  #   - cron: "0 7 * * *"   # 07:00 UTC daily
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Run self-improving QA
+        env:
+          BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+          BROWSERBASE_PROJECT_ID: ${{ secrets.BROWSERBASE_PROJECT_ID }}
+          MODEL_API_KEY: ${{ secrets.MODEL_API_KEY }}
+          QA_URL: ${{ github.event.inputs.url }}
+        run: bun examples/scheduled-qa.ts
+      - name: Upload evolved strategy
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolved-strategy
+          path: strategy.*.md
+          if-no-files-found: ignore
