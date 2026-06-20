@@ -1,0 +1,56 @@
+{
+  "name": "web-autopilot",
+  "version": "0.1.0",
+  "description": "Drive cloud browsers with natural-language actions — an autonomous browser-agent starter on Browserbase + Stagehand.",
+  "type": "module",
+  "bin": {
+    "web-autopilot": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "tsx src/cli.ts",
+    "example": "tsx",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": [
+    "browserbase",
+    "stagehand",
+    "browser-automation",
+    "ai-agent",
+    "autonomous-agent",
+    "playwright",
+    "cloud-browser",
+    "web-agent"
+  ],
+  "author": "ss251",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ss251/web-autopilot.git"
+  },
+  "homepage": "https://github.com/ss251/web-autopilot#readme",
+  "bugs": {
+    "url": "https://github.com/ss251/web-autopilot/issues"
+  },
+  "dependencies": {
+    "@browserbasehq/stagehand": "^3.6.0",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}

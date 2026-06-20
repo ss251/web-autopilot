@@ -1,0 +1,22 @@
+node_modules/
+dist/
+*.log
+*.tsbuildinfo
+
+# secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+cookies.json
+*.cookies.json
+*.session.json
+
+# local run artifacts (screenshots, dumps)
+*.png
+*.jpeg
+*.jpg
+*.pdf
+
+.DS_Store
+.idea/
+.vscode/
