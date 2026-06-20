@@ -1,6 +1,6 @@
 {
   "name": "web-autopilot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Drive cloud browsers with natural-language actions — an autonomous browser-agent starter on Browserbase + Stagehand.",
   "type": "module",
   "bin": {

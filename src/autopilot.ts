@@ -23,6 +23,23 @@ import { liveViewUrl, releaseRunningSessions, requestRelease } from "./session.j
 /** A Playwright-style page. Typed loosely so we don't pin a Stagehand version. */
 export type Page = any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
+/** One step the autonomous agent took. */
+export interface AgentAction {
+  type: string;
+  reasoning?: string;
+  action?: string;
+  [k: string]: unknown;
+}
+
+/** Result of an autonomous `agent()` run. */
+export interface AgentRunResult {
+  success: boolean;
+  message: string;
+  actions: AgentAction[];
+  completed: boolean;
+  [k: string]: unknown;
+}
+
 export interface Cookie {
   name: string;
   value: string;
@@ -139,6 +156,18 @@ export class Autopilot {
     const sh: any = this.stagehand;
     if (typeof sh.extract === "function") return sh.extract(args);
     return this.page.extract(args);
+  }
+
+  /**
+   * Autonomous agent: hand it a goal and it plans + executes the multi-step flow
+   * itself (Stagehand's `agent` primitive), rather than you scripting each act().
+   * Returns a structured result ({ success, message, actions, completed }).
+   */
+  async agent(instruction: string, opts: { maxSteps?: number; model?: string } = {}): Promise<AgentRunResult> {
+    const sh: any = this.stagehand;
+    const agent = sh.agent(opts.model ? { model: opts.model } : {});
+    const result = await agent.execute({ instruction, maxSteps: opts.maxSteps ?? 20 });
+    return result as AgentRunResult;
   }
 
   /** Inject cookies (bring-your-own-session auth). Use only with your own credentials. */

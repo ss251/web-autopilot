@@ -46,6 +46,8 @@ hard-won details live in [`docs/GOTCHAS.md`](docs/GOTCHAS.md).
 ## Features
 
 - 🗣️ **Natural-language actions** — `act()`, `observe()`, structured `extract()` (zod).
+- 🤖 **Autonomous agent** — `agent(goal)` plans *and* executes a multi-step flow itself.
+- 🌱 **Self-improving loop** — `improve()` runs, verifies, reflects, and rewrites its own strategy until a task passes reliably ([auto-research](docs/SELF-IMPROVING.md)).
 - ☁️ **Cloud browsers** — runs on Browserbase; nothing to install locally.
 - 🔁 **Session hygiene** — auto-releases stale sessions so you don't 429.
 - 🍪 **Bring-your-own-session** — inject a cookie to drive apps *you* are logged into.
@@ -101,6 +103,8 @@ web-autopilot --url https://example.com --observe "what is the main heading?"
 bun run examples/navigate.ts     # connect, act, screenshot
 bun run examples/extract.ts      # structured extraction with a zod schema
 bun run examples/cookie-auth.ts  # bring-your-own-session (your creds only)
+bun run examples/agent.ts        # autonomous multi-step agent
+bun run examples/self-improve.ts # the self-improving auto-research loop
 ```
 
 ## Bring-your-own-session (cookie auth)
@@ -125,6 +129,40 @@ Keep the cookie in `.env` or a `cookies.json` — both are gitignored so you don
 commit a credential. Only ever use **your own** session, on a service you're
 authorized to automate. (See *Use responsibly* above.)
 
+## Autonomous agent
+
+For multi-step flows, don't script each action — hand the agent a goal and it
+plans and executes the whole thing (Stagehand's `agent` primitive):
+
+```ts
+const result = await bot.agent(
+  "add the first product to the cart and go to checkout",
+  { maxSteps: 12 },
+);
+console.log(result.success, result.message, result.actions.length);
+```
+
+## Self-improving loop (auto-research)
+
+Brittle automation rots. Instead, declare the **objective** + a **success check**
+and let the loop discover a reliable strategy — running the agent, verifying,
+and **reflecting on each failure to rewrite its own instructions** until the task
+passes consistently. Inspired by Browserbase's [`autobrowse`](https://github.com/browserbase/skills/blob/main/skills/autobrowse/SKILL.md)
+skill and Karpathy's autoresearch harness. Full writeup: [docs/SELF-IMPROVING.md](docs/SELF-IMPROVING.md).
+
+```ts
+import { improve } from "web-autopilot";
+
+const result = await improve(bot, {
+  name: "checkout-smoke",
+  url: "https://shop.example.com",
+  goal: "add the first product to the cart and reach the checkout page",
+  verify: async (b) => String(b.page.url()).includes("/checkout"),
+}, { maxIterations: 5, passesToWin: 2, strategyPath: "strategy.checkout.md" });
+
+console.log(result.passed, result.strategy);   // the evolved, reusable skill
+```
+
 ## API
 
 ```ts
@@ -145,6 +183,7 @@ await bot.goto(url, opts?);
 await bot.act("click the cart icon");
 await bot.observe("is there a captcha?");
 await bot.extract({ instruction, schema });   // schema = zod
+await bot.agent("add to cart and checkout", { maxSteps });  // autonomous multi-step run
 await bot.addCookies([...]);
 await bot.screenshot("out.png", { fullPage? });
 await bot.liveViewUrl();                // watch it live
@@ -152,7 +191,9 @@ await bot.close({ release? });          // also releases a keepAlive session
 ```
 
 Session helpers (`listSessions`, `requestRelease`, `releaseRunningSessions`,
-`liveViewUrl`) are exported too, for managing Browserbase out-of-band.
+`liveViewUrl`) are exported too, for managing Browserbase out-of-band. The
+self-improving `improve(bot, task, opts)` loop and the `geminiComplete()`
+reflection helper are exported as well — see [docs/SELF-IMPROVING.md](docs/SELF-IMPROVING.md).
 
 ## How it works
 
